@@ -10,9 +10,11 @@
   :root {
     --bg:       #0a0c10;
     --surface:  #111419;
+    --surface2: #161a22;
     --border:   #1e2330;
     --text:     #c9d1e0;
     --muted:    #4a5568;
+    --muted2:   #2d3748;
     --accent:   #e8c547;
     --red:      #e05252;
     --green:    #4caf7d;
@@ -76,6 +78,59 @@
     gap: 20px;
   }
 
+  /* ── Section header ──────────────────────── */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Info note ───────────────────────────── */
+  .info-note {
+    background: var(--surface2);
+    border-left: 2px solid var(--muted2);
+    padding: 10px 14px;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.65;
+    font-family: var(--mono);
+    margin-bottom: 12px;
+  }
+  .info-note strong {
+    color: #7a8fa8;
+    font-weight: 500;
+  }
+  .info-note .reading-guide {
+    margin-top: 6px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .reading-guide-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+  }
+  .rg-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
   /* ── KPI row ─────────────────────────────── */
   .kpi-row {
     display: grid;
@@ -123,6 +178,22 @@
     margin-top: 6px;
     font-family: var(--mono);
   }
+  /* Tooltip on hover */
+  .kpi-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(17,20,25,0.97);
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+    font-size: 10.5px;
+    color: var(--muted);
+    font-family: var(--mono);
+    line-height: 1.55;
+    z-index: 5;
+  }
+  .kpi:hover .kpi-tooltip { display: block; }
+  .kpi:hover { z-index: 6; }
 
   /* ── Chart cards ─────────────────────────── */
   .chart-grid {
@@ -130,9 +201,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
-  .chart-grid.wide {
-    grid-template-columns: 1fr;
-  }
+  .chart-grid.wide { grid-template-columns: 1fr; }
 
   .card {
     background: var(--surface);
@@ -144,7 +213,7 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin-bottom: 10px;
   }
   .card-title {
     font-family: var(--mono);
@@ -159,6 +228,17 @@
     color: var(--muted);
     font-family: var(--mono);
   }
+
+  .card-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    line-height: 1.6;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-note strong { color: #7a8fa8; font-weight: 500; }
 
   canvas { width: 100% !important; }
 
@@ -182,9 +262,21 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 16px;
+    margin-bottom: 4px;
     align-self: flex-start;
   }
+  .gauge-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    line-height: 1.6;
+    margin-bottom: 10px;
+    align-self: flex-start;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    width: 100%;
+  }
+  .gauge-note strong { color: #7a8fa8; font-weight: 500; }
 
   .prob-display {
     font-family: var(--mono);
@@ -216,7 +308,29 @@
     text-align: center;
   }
 
-  /* ── Alarm mass legend ───────────────────── */
+  /* threshold ruler */
+  .threshold-ruler {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted2);
+  }
+  .threshold-ruler span { position: relative; }
+  .threshold-ruler .mark40::before,
+  .threshold-ruler .mark65::before {
+    content: '▲';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    color: var(--muted2);
+  }
+
+  /* ── Legend ──────────────────────────────── */
   .legend {
     display: flex;
     gap: 16px;
@@ -230,9 +344,50 @@
     font-size: 10px;
     color: var(--muted);
   }
-  .legend-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── Methodology box ─────────────────────── */
+  .methodology {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px 24px;
+  }
+  .methodology h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .method-item {}
+  .method-item h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .method-item p {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-family: var(--mono);
+    line-height: 1.7;
+  }
+  .method-formula {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #7a8fa8;
+    background: var(--bg);
+    padding: 5px 8px;
+    margin: 6px 0;
+    border-left: 2px solid var(--muted2);
   }
 
   /* ── Footer ──────────────────────────────── */
@@ -248,7 +403,7 @@
     margin: 0 auto;
   }
 
-  /* ── Loading overlay ─────────────────────── */
+  /* ── Loader ──────────────────────────────── */
   #loader {
     position: fixed;
     inset: 0;
@@ -265,11 +420,13 @@
   }
 
   @media (max-width: 900px) {
-    .kpi-row        { grid-template-columns: repeat(3, 1fr); }
+    .kpi-row        { grid-template-columns: repeat(2, 1fr); }
     .chart-grid     { grid-template-columns: 1fr; }
     .gauge-row      { grid-template-columns: 1fr; }
+    .method-grid    { grid-template-columns: 1fr; }
     main            { padding: 16px; }
     header          { padding: 16px; }
+    footer          { flex-direction: column; gap: 4px; padding: 16px; }
   }
 </style>
 </head>
@@ -287,53 +444,142 @@
 
 <main>
 
-  <!-- KPI strip -->
+  <!-- ── Section: Live Readings ──────────────────────────────────────── -->
+  <div class="section-header">
+    <span class="section-title">Live Market Readings</span>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="info-note">
+    These five indicators are extracted daily from the Binance P2P order book for USDT/BOB.
+    Together they describe the <strong>current state</strong> of dollar scarcity in Bolivia's informal market.
+    Hover over each card for a detailed explanation. The coloured top-border signals stress level:
+    <div class="reading-guide" style="margin-top:8px;">
+      <div class="reading-guide-item"><div class="rg-dot" style="background:var(--green)"></div>Green = low stress</div>
+      <div class="reading-guide-item"><div class="rg-dot" style="background:var(--accent)"></div>Amber = moderate stress</div>
+      <div class="reading-guide-item"><div class="rg-dot" style="background:var(--red)"></div>Red = high stress</div>
+    </div>
+  </div>
+
   <div class="kpi-row" id="kpi-row">
     <div class="kpi" id="kpi-mid">
       <div class="kpi-label">Shadow Rate</div>
       <div class="kpi-value">—</div>
       <div class="kpi-sub">BOB / USDT</div>
+      <div class="kpi-tooltip">
+        The <strong>de facto</strong> exchange rate at which USDT (≈ USD) trades on Binance P2P.
+        Computed as the quantity-weighted average of the best ask and bid prices.
+        Bolivia's official peg is fixed at 6.96 BOB/USD since 2011 — any value above
+        that reflects the <em>scarcity premium</em> the informal market is pricing in.
+      </div>
     </div>
     <div class="kpi" id="kpi-gap">
       <div class="kpi-label">Premium vs Peg</div>
       <div class="kpi-value">—</div>
       <div class="kpi-sub">Official peg: 6.96</div>
+      <div class="kpi-tooltip">
+        How much more expensive dollars are in the P2P market versus the official rate.
+        <strong>Formula:</strong> (shadow rate − 6.96). A +2.19 gap means buying $1 costs
+        2.19 BOB more than the official rate — a 31% premium. Historically: 50% in
+        early 2025, peaked at 141% in May 2025, now at 31% (normalisation phase).
+      </div>
     </div>
     <div class="kpi" id="kpi-spread">
       <div class="kpi-label">Panic Premium τ</div>
       <div class="kpi-value">—</div>
-      <div class="kpi-sub">Bid-ask spread</div>
+      <div class="kpi-sub">Round-trip friction cost</div>
+      <div class="kpi-tooltip">
+        The bid-ask spread as a % of the mid price: (ask − bid) / mid.
+        This is the <strong>round-trip cost</strong> of informal dollar access — what you
+        lose if you buy then immediately sell. A high spread signals market-maker
+        fear and adverse selection: sellers demand extra compensation for devaluation
+        risk. <strong>Paradox:</strong> wide spreads often precede price corrections,
+        not further rises — they signal panic, not sustained pressure.
+      </div>
     </div>
     <div class="kpi" id="kpi-emp">
       <div class="kpi-label">EMP Index</div>
       <div class="kpi-value">—</div>
-      <div class="kpi-sub">σ from baseline</div>
+      <div class="kpi-sub">σ from full-sample mean</div>
+      <div class="kpi-tooltip">
+        Exchange Market Pressure — a composite index combining the shadow gap,
+        spread, and liquidity stress into a single number via Principal Component Analysis (PCA).
+        Expressed in standard deviations from the 18-month mean.
+        <strong>Read as:</strong> above 0 = above-average pressure; above +1.5σ = high stress;
+        above +2σ = crisis. Current reading of −1.33σ is the sample minimum, consistent
+        with the deepest normalisation since data collection began.
+      </div>
     </div>
     <div class="kpi" id="kpi-emp-r">
       <div class="kpi-label">Rolling EMP</div>
       <div class="kpi-value">—</div>
       <div class="kpi-sub">30-day window</div>
+      <div class="kpi-tooltip">
+        Same as the EMP Index but re-standardised using a <strong>30-day rolling window</strong>
+        instead of the full sample. This captures short-run stress relative to recent
+        conditions — useful for detecting rapid deterioration even when the full-sample
+        EMP appears calm. If rolling EMP rises sharply while full-sample EMP remains low,
+        it signals an emerging episode worth monitoring.
+      </div>
     </div>
   </div>
 
-  <!-- Prob gauges -->
+  <!-- ── Section: Warning Probabilities ──────────────────────────────── -->
+  <div class="section-header" style="margin-top:8px;">
+    <span class="section-title">Depreciation Warning Probabilities</span>
+    <div class="section-rule"></div>
+  </div>
+
   <div class="gauge-row">
     <div class="gauge-card">
       <div class="gauge-title">P( Depreciation ≥5% · 14 days )</div>
+      <div class="gauge-note">
+        Probability that the P2P shadow rate will be <strong>≥5% higher</strong> in 14 days.
+        Estimated by a logistic regression model trained on 18 months of daily data.
+        The key driver at this horizon is the <strong>shadow gap</strong> (z_gap):
+        a large gap today predicts a larger gap in two weeks. Crosses 50% when z_gap
+        and z_liq both signal elevated stress simultaneously.
+      </div>
       <div class="prob-display" id="prob14">—</div>
       <div class="prob-bar-track">
         <div class="prob-bar-fill" id="bar14" style="width:0%"></div>
       </div>
-      <div class="prob-label" id="label14">—</div>
+      <div class="threshold-ruler">
+        <span>0%</span>
+        <span class="mark40">40%<br><span style="font-size:9px;color:var(--muted2)">moderate</span></span>
+        <span class="mark65">65%<br><span style="font-size:9px;color:var(--muted2)">high</span></span>
+        <span>100%</span>
+      </div>
+      <div class="prob-label" id="label14" style="margin-top:10px;">—</div>
     </div>
     <div class="gauge-card">
       <div class="gauge-title">P( Depreciation ≥5% · 30 days )</div>
+      <div class="gauge-note">
+        Probability that the P2P shadow rate will be <strong>≥5% higher</strong> in 30 days.
+        At this horizon, <strong>liquidity stress</strong> (z_liq) is the dominant predictor
+        (AUC 0.928 in-sample). A thin order book — sellers withdrawing supply — leads
+        prices by days to weeks. One standard-deviation increase in z_liq multiplies
+        the 30-day depreciation odds by 57×. Currently both z_liq and z_gap are at
+        sample lows, keeping this probability below 40%.
+      </div>
       <div class="prob-display" id="prob30">—</div>
       <div class="prob-bar-track">
         <div class="prob-bar-fill" id="bar30" style="width:0%"></div>
       </div>
-      <div class="prob-label" id="label30">—</div>
+      <div class="threshold-ruler">
+        <span>0%</span>
+        <span class="mark40">40%<br><span style="font-size:9px;color:var(--muted2)">moderate</span></span>
+        <span class="mark65">65%<br><span style="font-size:9px;color:var(--muted2)">high</span></span>
+        <span>100%</span>
+      </div>
+      <div class="prob-label" id="label30" style="margin-top:10px;">—</div>
     </div>
+  </div>
+
+  <!-- ── Section: Charts ──────────────────────────────────────────────── -->
+  <div class="section-header" style="margin-top:8px;">
+    <span class="section-title">Historical Series</span>
+    <div class="section-rule"></div>
   </div>
 
   <!-- Shadow rate + EMP -->
@@ -346,6 +592,13 @@
           <div class="legend-item"><div class="legend-dot" style="background:#5b8def"></div>EMP (right axis)</div>
         </div>
       </div>
+      <div class="card-note">
+        The gold line shows the daily <strong>shadow exchange rate</strong> — what people actually
+        pay for dollars. The blue dashed line shows the <strong>EMP index</strong> (right axis),
+        which combines all three stress components. The two track closely but not perfectly:
+        EMP can rise (worsening) even when the price plateaus, if spreads widen or the book thins.
+        The May 2025 peak (16.79 BOB, EMP +3.72σ) marks the acute crisis episode.
+      </div>
       <canvas id="chart-rate" height="90"></canvas>
     </div>
   </div>
@@ -357,12 +610,26 @@
         <span class="card-title">30-Day Warning · Alarm Mass</span>
         <span class="card-desc">deviation from EMA baseline</span>
       </div>
+      <div class="card-note">
+        Shows how much the <strong>30-day warning probability</strong> has risen above its recent
+        trend (exponential moving average). <strong>Red = probability rising faster than usual</strong>
+        — an early signal that stress is building before it appears in the price.
+        Green = probability falling. This is a leading-edge indicator: alarm mass
+        often turns positive 1–2 weeks before the shadow rate visibly accelerates.
+      </div>
       <canvas id="chart-alarm" height="140"></canvas>
     </div>
     <div class="card">
       <div class="card-header">
         <span class="card-title">Panic Premium τ</span>
         <span class="card-desc">bid-ask spread / mid price</span>
+      </div>
+      <div class="card-note">
+        The round-trip cost of informal dollar access. Spiked to <strong>33% in May 2025</strong>
+        (the market was charging a 33% markup just for the service of matching buyer and seller).
+        Importantly, the spread is a <strong>contrarian indicator</strong>: historically, extreme
+        spread levels precede corrections rather than further price rises, because they signal
+        panic at the peak. Current 7.9% is near the sample low.
       </div>
       <canvas id="chart-spread" height="140"></canvas>
     </div>
@@ -374,24 +641,77 @@
       <div class="card-header">
         <span class="card-title">EMP Components (z-scores)</span>
         <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#e8c547"></div>Gap</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#e05252"></div>Spread</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#5b8def"></div>Liquidity stress</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e8c547"></div>z_gap (shadow rate gap)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e05252"></div>z_spread (panic premium)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#5b8def"></div>z_liq (liquidity stress)</div>
         </div>
       </div>
+      <div class="card-note">
+        Each component is standardised to mean 0, std 1 over the full sample.
+        <strong>z_gap</strong> (gold): shadow rate deviation — the dominant EMP factor.
+        <strong>z_spread</strong> (red): panic premium — contrarian predictor, tends to peak at turning points.
+        <strong>z_liq</strong> (blue): liquidity stress (−log depth) — the best leading indicator of
+        30-day depreciation. All three are currently at or near their sample minimums,
+        consistent with deep normalisation. Watch z_liq for the earliest warning of a reversal.
+      </div>
       <canvas id="chart-components" height="80"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Methodology ──────────────────────────────────────────────────── -->
+  <div class="section-header" style="margin-top:8px;">
+    <span class="section-title">Methodology</span>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="methodology">
+    <div class="method-grid">
+      <div class="method-item">
+        <h4>Data Source</h4>
+        <p>
+          All data come from the <strong>Binance P2P order book</strong> for USDT/BOB,
+          scraped daily and published as an open Kaggle dataset
+          (<em>andreschirinos/p2p-bob-exchange</em>). Each observation is a
+          quantity-weighted average across all active advertisers at the time of scraping.
+          Historical series starts August 2024. Updated daily at ~10 AM Bolivia time (UTC−4).
+        </p>
+      </div>
+      <div class="method-item">
+        <h4>EMP Index Construction</h4>
+        <p>
+          Three raw components are standardised (mean 0, σ 1) over the full sample:
+        </p>
+        <div class="method-formula">z_gap    = (mid − 6.96 − μ_g) / σ_g</div>
+        <div class="method-formula">z_spread = (τ − μ_τ) / σ_τ</div>
+        <div class="method-formula">z_liq    = −(ln depth − μ_ℓ) / σ_ℓ</div>
+        <p>
+          The EMP index is the <strong>first principal component</strong> of the three
+          z-scores, oriented so higher = more pressure. PC1 explains 55.8% of joint variance.
+          Loadings: gap +0.82, spread +0.52, liq −0.24.
+        </p>
+      </div>
+      <div class="method-item">
+        <h4>Early Warning Model</h4>
+        <p>
+          A logistic regression predicts the probability that the shadow rate rises ≥5%
+          within H days, using z_gap, z_spread, and z_liq as inputs.
+          Key findings: <strong>z_liq dominates at 30 days</strong> (AUC 0.928) because
+          order-book depth leads prices — sellers withdraw before the price spikes.
+          The spread is a contrarian predictor: a wide spread signals a peak, not
+          further deterioration. Reference: Hernani-Limarino (2026).
+        </p>
+      </div>
     </div>
   </div>
 
 </main>
 
 <footer>
-  <span>Data: Binance P2P (USDT/BOB) · andreschirinos/p2p-bob-exchange · Updates daily</span>
-  <span>Methodology: Hernani-Limarino (2025) — EMP = PCA(shadow gap, spread, liquidity stress)</span>
+  <span>Data: Binance P2P (USDT/BOB) · andreschirinos/p2p-bob-exchange · Updates daily at ~10:00 AM BOT</span>
+  <span>Methodology: Hernani-Limarino (2026) — EMP = PCA(shadow gap, spread, liquidity stress)</span>
 </footer>
 
 <script>
-// ── Chart defaults ────────────────────────────────────────────────────────────
 Chart.defaults.color          = '#4a5568';
 Chart.defaults.borderColor    = '#1e2330';
 Chart.defaults.font.family    = "'IBM Plex Mono', monospace";
@@ -405,8 +725,7 @@ const C_RED    = '#e05252';
 const C_GREEN  = '#4caf7d';
 const C_MUTED  = '#1e2330';
 
-function pct(v) { return (v * 100).toFixed(1) + '%'; }
-function fmt2(v) { return v !== null ? v.toFixed(2) : '—'; }
+function pct(v)  { return (v * 100).toFixed(1) + '%'; }
 function fmt3(v) { return v !== null ? v.toFixed(3) : '—'; }
 
 function riskClass(p) {
@@ -420,7 +739,7 @@ function riskColor(p) {
   return C_GREEN;
 }
 function riskLabel(p) {
-  if (p >= 0.65) return 'HIGH RISK — Market signals elevated stress';
+  if (p >= 0.65) return 'HIGH RISK — Elevated stress signal';
   if (p >= 0.40) return 'MODERATE — Monitor closely';
   return 'LOW — No acute signal';
 }
@@ -433,7 +752,6 @@ function kpiLevel(id, v, lo, hi) {
   else el.classList.add('ok');
 }
 
-// ── Alarm mass area plugin ────────────────────────────────────────────────────
 function alarmPlugin(redColor, greenColor) {
   return {
     id: 'alarmFill',
@@ -442,14 +760,11 @@ function alarmPlugin(redColor, greenColor) {
       if (!scales.y) return;
       const zero = scales.y.getPixelForValue(0);
       const ds   = chart.data.datasets[0].data;
-      const labels = chart.data.labels;
       if (!ds || ds.length === 0) return;
-
       ctx.save();
       ctx.beginPath();
       ctx.rect(left, top, right - left, bottom - top);
       ctx.clip();
-
       const xScale = scales.x;
       for (let i = 0; i < ds.length - 1; i++) {
         if (ds[i] === null || ds[i+1] === null) continue;
@@ -458,10 +773,8 @@ function alarmPlugin(redColor, greenColor) {
         const y0 = scales.y.getPixelForValue(ds[i]);
         const y1 = scales.y.getPixelForValue(ds[i + 1]);
         ctx.beginPath();
-        ctx.moveTo(x0, zero);
-        ctx.lineTo(x0, y0);
-        ctx.lineTo(x1, y1);
-        ctx.lineTo(x1, zero);
+        ctx.moveTo(x0, zero); ctx.lineTo(x0, y0);
+        ctx.lineTo(x1, y1);  ctx.lineTo(x1, zero);
         ctx.closePath();
         ctx.fillStyle = (ds[i] + ds[i+1]) / 2 > 0 ? redColor : greenColor;
         ctx.fill();
@@ -471,30 +784,29 @@ function alarmPlugin(redColor, greenColor) {
   };
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+const commonX = {
+  grid: { color: C_MUTED },
+  ticks: { maxTicksLimit: 8, maxRotation: 0 }
+};
+const tooltipDefaults = {
+  backgroundColor: '#111419',
+  borderColor: '#1e2330',
+  borderWidth: 1
+};
+
 async function init() {
   const res  = await fetch('data.json');
   const json = await res.json();
   const data = json.series;
 
-  // Hide loader
   const loader = document.getElementById('loader');
   loader.style.opacity = '0';
   setTimeout(() => loader.remove(), 400);
 
-  // Updated stamp
-  document.getElementById('last-updated').textContent =
-    'Updated: ' + json.updated;
+  document.getElementById('last-updated').textContent = 'Updated: ' + json.updated;
 
   const labels = data.map(d => d.date);
   const latest = data[data.length - 1];
-
-  // ── KPI strip ────────────────────────────────────────────────────────────
-  const mid   = latest.mid;
-  const gap   = latest.gap;
-  const spr   = latest.spread_pct;
-  const emp   = latest.emp;
-  const empR  = latest.emp_rolling;
 
   function setKpi(id, val, sub) {
     const el = document.getElementById(id);
@@ -502,238 +814,109 @@ async function init() {
     if (sub) el.querySelector('.kpi-sub').textContent = sub;
   }
 
+  const mid  = latest.mid;
+  const gap  = latest.gap;
+  const spr  = latest.spread_pct;
+  const emp  = latest.emp;
+  const empR = latest.emp_rolling;
+
   setKpi('kpi-mid',    mid.toFixed(4) + ' ₿', 'BOB / USDT');
   setKpi('kpi-gap',    '+' + gap.toFixed(3),   `+${((gap/PERI)*100).toFixed(1)}% above peg`);
   setKpi('kpi-spread', pct(spr),               'Round-trip friction cost');
   setKpi('kpi-emp',    fmt3(emp),               'σ from full-sample mean');
   setKpi('kpi-emp-r',  fmt3(empR),              '30-day rolling σ');
 
-  kpiLevel('kpi-gap',    gap,   2.0,  3.5);
-  kpiLevel('kpi-spread', spr,   0.10, 0.20);
-  kpiLevel('kpi-emp',    emp,   0,    1.5);
-  kpiLevel('kpi-emp-r',  empR,  0,    1.5);
+  kpiLevel('kpi-gap',    gap,  2.0,  3.5);
+  kpiLevel('kpi-spread', spr,  0.10, 0.20);
+  kpiLevel('kpi-emp',    emp,  0,    1.5);
+  kpiLevel('kpi-emp-r',  empR !== null ? empR : 0, 0, 1.5);
 
-  // ── Probability gauges ───────────────────────────────────────────────────
   function setGauge(idProb, idBar, idLabel, p) {
     if (p === null) return;
-    const cls   = riskClass(p);
-    const color = riskColor(p);
-    const el    = document.getElementById(idProb);
+    const el = document.getElementById(idProb);
     el.textContent = pct(p);
-    el.className   = 'prob-display ' + cls;
+    el.className   = 'prob-display ' + riskClass(p);
     const bar = document.getElementById(idBar);
     bar.style.width      = pct(p);
-    bar.style.background = color;
+    bar.style.background = riskColor(p);
     document.getElementById(idLabel).textContent = riskLabel(p);
   }
 
   setGauge('prob14', 'bar14', 'label14', latest.prob_depr_14d);
   setGauge('prob30', 'bar30', 'label30', latest.prob_depr_30d);
 
-  // ── Chart helpers ────────────────────────────────────────────────────────
-  const commonX = {
-    grid: { color: C_MUTED },
-    ticks: { maxTicksLimit: 8, maxRotation: 0 }
-  };
-
-  // ── 1. Shadow rate + EMP ─────────────────────────────────────────────────
+  // ── 1. Shadow rate + EMP
   new Chart(document.getElementById('chart-rate'), {
     type: 'line',
     data: {
       labels,
       datasets: [
-        {
-          label: 'Mid price',
-          data: data.map(d => d.mid),
-          borderColor: C_ACCENT,
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0.3,
-          yAxisID: 'y'
-        },
-        {
-          label: 'EMP',
-          data: data.map(d => d.emp),
-          borderColor: C_BLUE,
-          borderWidth: 1.2,
-          borderDash: [4, 3],
-          pointRadius: 0,
-          tension: 0.3,
-          yAxisID: 'y2'
-        },
-        {
-          label: 'Rolling EMP',
-          data: data.map(d => d.emp_rolling),
-          borderColor: C_BLUE,
-          borderWidth: 1,
-          borderDash: [2, 2],
-          pointRadius: 0,
-          tension: 0.3,
-          yAxisID: 'y2',
-          borderAlpha: 0.5,
-        }
+        { label: 'Mid price', data: data.map(d => d.mid),
+          borderColor: C_ACCENT, borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
+        { label: 'EMP', data: data.map(d => d.emp),
+          borderColor: C_BLUE, borderWidth: 1.2, borderDash: [4,3], pointRadius: 0, tension: 0.3, yAxisID: 'y2' },
+        { label: 'Rolling EMP', data: data.map(d => d.emp_rolling),
+          borderColor: C_BLUE, borderWidth: 1, borderDash: [2,2], pointRadius: 0, tension: 0.3, yAxisID: 'y2', borderAlpha: 0.5 }
       ]
     },
     options: {
-      responsive: true,
-      animation: false,
+      responsive: true, animation: false,
       interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#111419',
-          borderColor: '#1e2330',
-          borderWidth: 1,
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(4)}`
-          }
-        }
-      },
+      plugins: { legend: { display: false }, tooltip: { ...tooltipDefaults,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(4)}` } } },
       scales: {
         x: commonX,
-        y:  {
-          position: 'left',
-          grid: { color: C_MUTED },
-          title: { display: true, text: 'BOB / USDT', color: '#4a5568' }
-        },
-        y2: {
-          position: 'right',
-          grid: { drawOnChartArea: false },
-          title: { display: true, text: 'EMP (σ)', color: '#4a5568' }
-        }
+        y:  { position: 'left',  grid: { color: C_MUTED }, title: { display: true, text: 'BOB / USDT', color: '#4a5568' } },
+        y2: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'EMP (σ)', color: '#4a5568' } }
       }
     }
   });
 
-  // ── 2. Alarm mass ────────────────────────────────────────────────────────
+  // ── 2. Alarm mass
   new Chart(document.getElementById('chart-alarm'), {
     type: 'line',
     plugins: [alarmPlugin('rgba(224,82,82,0.25)', 'rgba(76,175,125,0.18)')],
-    data: {
-      labels,
-      datasets: [{
-        label: 'Alarm mass (30d)',
-        data: data.map(d => d.alarm_mass_30d),
-        borderColor: C_RED,
-        borderWidth: 1.2,
-        pointRadius: 0,
-        tension: 0.2,
-        fill: false
-      }]
-    },
+    data: { labels, datasets: [{
+      label: 'Alarm mass (30d)', data: data.map(d => d.alarm_mass_30d),
+      borderColor: C_RED, borderWidth: 1.2, pointRadius: 0, tension: 0.2, fill: false
+    }]},
     options: {
-      responsive: true,
-      animation: false,
+      responsive: true, animation: false,
       interaction: { mode: 'index', intersect: false },
-      plugins: {
-        tooltip: {
-          backgroundColor: '#111419',
-          borderColor: '#1e2330',
-          borderWidth: 1
-        }
-      },
-      scales: {
-        x: commonX,
-        y: {
-          grid: { color: C_MUTED },
-          title: { display: true, text: 'Deviation from baseline', color: '#4a5568' }
-        }
-      }
+      plugins: { tooltip: tooltipDefaults },
+      scales: { x: commonX, y: { grid: { color: C_MUTED }, title: { display: true, text: 'Deviation from baseline', color: '#4a5568' } } }
     }
   });
 
-  // ── 3. Panic spread ──────────────────────────────────────────────────────
+  // ── 3. Panic spread
   new Chart(document.getElementById('chart-spread'), {
     type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Spread %',
-        data: data.map(d => d.spread_pct ? d.spread_pct * 100 : null),
-        borderColor: C_RED,
-        borderWidth: 1.5,
-        pointRadius: 0,
-        tension: 0.2,
-        fill: {
-          target: 'origin',
-          above: 'rgba(224,82,82,0.08)'
-        }
-      }]
-    },
+    data: { labels, datasets: [{
+      label: 'Spread %', data: data.map(d => d.spread_pct ? d.spread_pct * 100 : null),
+      borderColor: C_RED, borderWidth: 1.5, pointRadius: 0, tension: 0.2,
+      fill: { target: 'origin', above: 'rgba(224,82,82,0.08)' }
+    }]},
     options: {
-      responsive: true,
-      animation: false,
+      responsive: true, animation: false,
       interaction: { mode: 'index', intersect: false },
-      plugins: {
-        tooltip: {
-          backgroundColor: '#111419',
-          borderColor: '#1e2330',
-          borderWidth: 1,
-          callbacks: {
-            label: ctx => ` Spread: ${ctx.parsed.y?.toFixed(2)}%`
-          }
-        }
-      },
-      scales: {
-        x: commonX,
-        y: {
-          grid: { color: C_MUTED },
-          title: { display: true, text: 'τ (%)', color: '#4a5568' }
-        }
-      }
+      plugins: { tooltip: { ...tooltipDefaults, callbacks: { label: ctx => ` Spread: ${ctx.parsed.y?.toFixed(2)}%` } } },
+      scales: { x: commonX, y: { grid: { color: C_MUTED }, title: { display: true, text: 'τ (%)', color: '#4a5568' } } }
     }
   });
 
-  // ── 4. Components ────────────────────────────────────────────────────────
+  // ── 4. EMP components
   new Chart(document.getElementById('chart-components'), {
     type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'z_gap',
-          data: data.map(d => d.z_gap),
-          borderColor: C_ACCENT,
-          borderWidth: 1,
-          pointRadius: 0,
-          tension: 0.3
-        },
-        {
-          label: 'z_spread',
-          data: data.map(d => d.z_spread),
-          borderColor: C_RED,
-          borderWidth: 1,
-          pointRadius: 0,
-          tension: 0.3
-        },
-        {
-          label: 'z_liq',
-          data: data.map(d => d.z_liq),
-          borderColor: C_BLUE,
-          borderWidth: 1,
-          pointRadius: 0,
-          tension: 0.3
-        }
-      ]
-    },
+    data: { labels, datasets: [
+      { label: 'z_gap',    data: data.map(d => d.z_gap),    borderColor: C_ACCENT, borderWidth: 1, pointRadius: 0, tension: 0.3 },
+      { label: 'z_spread', data: data.map(d => d.z_spread), borderColor: C_RED,    borderWidth: 1, pointRadius: 0, tension: 0.3 },
+      { label: 'z_liq',   data: data.map(d => d.z_liq),    borderColor: C_BLUE,   borderWidth: 1, pointRadius: 0, tension: 0.3 }
+    ]},
     options: {
-      responsive: true,
-      animation: false,
+      responsive: true, animation: false,
       interaction: { mode: 'index', intersect: false },
-      plugins: {
-        tooltip: {
-          backgroundColor: '#111419',
-          borderColor: '#1e2330',
-          borderWidth: 1
-        }
-      },
-      scales: {
-        x: commonX,
-        y: {
-          grid: { color: C_MUTED },
-          title: { display: true, text: 'σ', color: '#4a5568' }
-        }
-      }
+      plugins: { tooltip: tooltipDefaults },
+      scales: { x: commonX, y: { grid: { color: C_MUTED }, title: { display: true, text: 'σ', color: '#4a5568' } } }
     }
   });
 }
