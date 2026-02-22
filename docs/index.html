@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolivia P2P Dollar — Early Warning System</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:       #0a0c10;
+    --surface:  #111419;
+    --border:   #1e2330;
+    --text:     #c9d1e0;
+    --muted:    #4a5568;
+    --accent:   #e8c547;
+    --red:      #e05252;
+    --green:    #4caf7d;
+    --blue:     #5b8def;
+    --mono:     'IBM Plex Mono', monospace;
+    --sans:     'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ─────────────────────────────── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .logo-block { display: flex; align-items: baseline; gap: 12px; }
+  .logo-block h1 {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .logo-block span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  #last-updated {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── Main grid ───────────────────────────── */
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 32px;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* ── KPI row ─────────────────────────────── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+  .kpi.danger::before  { background: var(--red);   opacity: 1; }
+  .kpi.warning::before { background: var(--accent); opacity: 1; }
+  .kpi.ok::before      { background: var(--green);  opacity: 1; }
+
+  .kpi-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+
+  /* ── Chart cards ─────────────────────────── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .chart-grid.wide {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px 24px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .card-desc {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  canvas { width: 100% !important; }
+
+  /* ── Warning gauge ───────────────────────── */
+  .gauge-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .gauge-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .gauge-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    align-self: flex-start;
+  }
+
+  .prob-display {
+    font-family: var(--mono);
+    font-size: 52px;
+    font-weight: 300;
+    line-height: 1;
+    margin: 8px 0;
+  }
+  .prob-display.high   { color: var(--red); }
+  .prob-display.medium { color: var(--accent); }
+  .prob-display.low    { color: var(--green); }
+
+  .prob-bar-track {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    margin: 12px 0 8px;
+    position: relative;
+  }
+  .prob-bar-fill {
+    height: 100%;
+    transition: width 0.8s ease;
+  }
+
+  .prob-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── Alarm mass legend ───────────────────── */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── Footer ──────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* ── Loading overlay ─────────────────────── */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    z-index: 100;
+    transition: opacity 0.4s;
+  }
+
+  @media (max-width: 900px) {
+    .kpi-row        { grid-template-columns: repeat(3, 1fr); }
+    .chart-grid     { grid-template-columns: 1fr; }
+    .gauge-row      { grid-template-columns: 1fr; }
+    main            { padding: 16px; }
+    header          { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">LOADING DATA…</div>
+
+<header>
+  <div class="logo-block">
+    <h1>Bolivia EWS</h1>
+    <span>P2P Dollar Early Warning System</span>
+  </div>
+  <div id="last-updated">—</div>
+</header>
+
+<main>
+
+  <!-- KPI strip -->
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi" id="kpi-mid">
+      <div class="kpi-label">Shadow Rate</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">BOB / USDT</div>
+    </div>
+    <div class="kpi" id="kpi-gap">
+      <div class="kpi-label">Premium vs Peg</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">Official peg: 6.96</div>
+    </div>
+    <div class="kpi" id="kpi-spread">
+      <div class="kpi-label">Panic Premium τ</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">Bid-ask spread</div>
+    </div>
+    <div class="kpi" id="kpi-emp">
+      <div class="kpi-label">EMP Index</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">σ from baseline</div>
+    </div>
+    <div class="kpi" id="kpi-emp-r">
+      <div class="kpi-label">Rolling EMP</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">30-day window</div>
+    </div>
+  </div>
+
+  <!-- Prob gauges -->
+  <div class="gauge-row">
+    <div class="gauge-card">
+      <div class="gauge-title">P( Depreciation ≥5% · 14 days )</div>
+      <div class="prob-display" id="prob14">—</div>
+      <div class="prob-bar-track">
+        <div class="prob-bar-fill" id="bar14" style="width:0%"></div>
+      </div>
+      <div class="prob-label" id="label14">—</div>
+    </div>
+    <div class="gauge-card">
+      <div class="gauge-title">P( Depreciation ≥5% · 30 days )</div>
+      <div class="prob-display" id="prob30">—</div>
+      <div class="prob-bar-track">
+        <div class="prob-bar-fill" id="bar30" style="width:0%"></div>
+      </div>
+      <div class="prob-label" id="label30">—</div>
+    </div>
+  </div>
+
+  <!-- Shadow rate + EMP -->
+  <div class="chart-grid wide">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Shadow Exchange Rate &amp; EMP Index</span>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#e8c547"></div>Mid price (BOB/USDT)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#5b8def"></div>EMP (right axis)</div>
+        </div>
+      </div>
+      <canvas id="chart-rate" height="90"></canvas>
+    </div>
+  </div>
+
+  <!-- Alarm mass + Spread -->
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">30-Day Warning · Alarm Mass</span>
+        <span class="card-desc">deviation from EMA baseline</span>
+      </div>
+      <canvas id="chart-alarm" height="140"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Panic Premium τ</span>
+        <span class="card-desc">bid-ask spread / mid price</span>
+      </div>
+      <canvas id="chart-spread" height="140"></canvas>
+    </div>
+  </div>
+
+  <!-- EMP components -->
+  <div class="chart-grid wide">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">EMP Components (z-scores)</span>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#e8c547"></div>Gap</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e05252"></div>Spread</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#5b8def"></div>Liquidity stress</div>
+        </div>
+      </div>
+      <canvas id="chart-components" height="80"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Data: Binance P2P (USDT/BOB) · andreschirinos/p2p-bob-exchange · Updates daily</span>
+  <span>Methodology: Hernani-Limarino (2025) — EMP = PCA(shadow gap, spread, liquidity stress)</span>
+</footer>
+
+<script>
+// ── Chart defaults ────────────────────────────────────────────────────────────
+Chart.defaults.color          = '#4a5568';
+Chart.defaults.borderColor    = '#1e2330';
+Chart.defaults.font.family    = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size      = 10;
+Chart.defaults.plugins.legend.display = false;
+
+const PERI     = 6.96;
+const C_ACCENT = '#e8c547';
+const C_BLUE   = '#5b8def';
+const C_RED    = '#e05252';
+const C_GREEN  = '#4caf7d';
+const C_MUTED  = '#1e2330';
+
+function pct(v) { return (v * 100).toFixed(1) + '%'; }
+function fmt2(v) { return v !== null ? v.toFixed(2) : '—'; }
+function fmt3(v) { return v !== null ? v.toFixed(3) : '—'; }
+
+function riskClass(p) {
+  if (p >= 0.65) return 'high';
+  if (p >= 0.40) return 'medium';
+  return 'low';
+}
+function riskColor(p) {
+  if (p >= 0.65) return C_RED;
+  if (p >= 0.40) return C_ACCENT;
+  return C_GREEN;
+}
+function riskLabel(p) {
+  if (p >= 0.65) return 'HIGH RISK — Market signals elevated stress';
+  if (p >= 0.40) return 'MODERATE — Monitor closely';
+  return 'LOW — No acute signal';
+}
+
+function kpiLevel(id, v, lo, hi) {
+  const el = document.getElementById(id);
+  el.classList.remove('danger','warning','ok');
+  if (v >= hi) el.classList.add('danger');
+  else if (v >= lo) el.classList.add('warning');
+  else el.classList.add('ok');
+}
+
+// ── Alarm mass area plugin ────────────────────────────────────────────────────
+function alarmPlugin(redColor, greenColor) {
+  return {
+    id: 'alarmFill',
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea: { top, bottom, left, right }, scales } = chart;
+      if (!scales.y) return;
+      const zero = scales.y.getPixelForValue(0);
+      const ds   = chart.data.datasets[0].data;
+      const labels = chart.data.labels;
+      if (!ds || ds.length === 0) return;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(left, top, right - left, bottom - top);
+      ctx.clip();
+
+      const xScale = scales.x;
+      for (let i = 0; i < ds.length - 1; i++) {
+        if (ds[i] === null || ds[i+1] === null) continue;
+        const x0 = xScale.getPixelForValue(i);
+        const x1 = xScale.getPixelForValue(i + 1);
+        const y0 = scales.y.getPixelForValue(ds[i]);
+        const y1 = scales.y.getPixelForValue(ds[i + 1]);
+        ctx.beginPath();
+        ctx.moveTo(x0, zero);
+        ctx.lineTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.lineTo(x1, zero);
+        ctx.closePath();
+        ctx.fillStyle = (ds[i] + ds[i+1]) / 2 > 0 ? redColor : greenColor;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  };
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+async function init() {
+  const res  = await fetch('data.json');
+  const json = await res.json();
+  const data = json.series;
+
+  // Hide loader
+  const loader = document.getElementById('loader');
+  loader.style.opacity = '0';
+  setTimeout(() => loader.remove(), 400);
+
+  // Updated stamp
+  document.getElementById('last-updated').textContent =
+    'Updated: ' + json.updated;
+
+  const labels = data.map(d => d.date);
+  const latest = data[data.length - 1];
+
+  // ── KPI strip ────────────────────────────────────────────────────────────
+  const mid   = latest.mid;
+  const gap   = latest.gap;
+  const spr   = latest.spread_pct;
+  const emp   = latest.emp;
+  const empR  = latest.emp_rolling;
+
+  function setKpi(id, val, sub) {
+    const el = document.getElementById(id);
+    el.querySelector('.kpi-value').textContent = val;
+    if (sub) el.querySelector('.kpi-sub').textContent = sub;
+  }
+
+  setKpi('kpi-mid',    mid.toFixed(4) + ' ₿', 'BOB / USDT');
+  setKpi('kpi-gap',    '+' + gap.toFixed(3),   `+${((gap/PERI)*100).toFixed(1)}% above peg`);
+  setKpi('kpi-spread', pct(spr),               'Round-trip friction cost');
+  setKpi('kpi-emp',    fmt3(emp),               'σ from full-sample mean');
+  setKpi('kpi-emp-r',  fmt3(empR),              '30-day rolling σ');
+
+  kpiLevel('kpi-gap',    gap,   2.0,  3.5);
+  kpiLevel('kpi-spread', spr,   0.10, 0.20);
+  kpiLevel('kpi-emp',    emp,   0,    1.5);
+  kpiLevel('kpi-emp-r',  empR,  0,    1.5);
+
+  // ── Probability gauges ───────────────────────────────────────────────────
+  function setGauge(idProb, idBar, idLabel, p) {
+    if (p === null) return;
+    const cls   = riskClass(p);
+    const color = riskColor(p);
+    const el    = document.getElementById(idProb);
+    el.textContent = pct(p);
+    el.className   = 'prob-display ' + cls;
+    const bar = document.getElementById(idBar);
+    bar.style.width      = pct(p);
+    bar.style.background = color;
+    document.getElementById(idLabel).textContent = riskLabel(p);
+  }
+
+  setGauge('prob14', 'bar14', 'label14', latest.prob_depr_14d);
+  setGauge('prob30', 'bar30', 'label30', latest.prob_depr_30d);
+
+  // ── Chart helpers ────────────────────────────────────────────────────────
+  const commonX = {
+    grid: { color: C_MUTED },
+    ticks: { maxTicksLimit: 8, maxRotation: 0 }
+  };
+
+  // ── 1. Shadow rate + EMP ─────────────────────────────────────────────────
+  new Chart(document.getElementById('chart-rate'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Mid price',
+          data: data.map(d => d.mid),
+          borderColor: C_ACCENT,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.3,
+          yAxisID: 'y'
+        },
+        {
+          label: 'EMP',
+          data: data.map(d => d.emp),
+          borderColor: C_BLUE,
+          borderWidth: 1.2,
+          borderDash: [4, 3],
+          pointRadius: 0,
+          tension: 0.3,
+          yAxisID: 'y2'
+        },
+        {
+          label: 'Rolling EMP',
+          data: data.map(d => d.emp_rolling),
+          borderColor: C_BLUE,
+          borderWidth: 1,
+          borderDash: [2, 2],
+          pointRadius: 0,
+          tension: 0.3,
+          yAxisID: 'y2',
+          borderAlpha: 0.5,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111419',
+          borderColor: '#1e2330',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(4)}`
+          }
+        }
+      },
+      scales: {
+        x: commonX,
+        y:  {
+          position: 'left',
+          grid: { color: C_MUTED },
+          title: { display: true, text: 'BOB / USDT', color: '#4a5568' }
+        },
+        y2: {
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: 'EMP (σ)', color: '#4a5568' }
+        }
+      }
+    }
+  });
+
+  // ── 2. Alarm mass ────────────────────────────────────────────────────────
+  new Chart(document.getElementById('chart-alarm'), {
+    type: 'line',
+    plugins: [alarmPlugin('rgba(224,82,82,0.25)', 'rgba(76,175,125,0.18)')],
+    data: {
+      labels,
+      datasets: [{
+        label: 'Alarm mass (30d)',
+        data: data.map(d => d.alarm_mass_30d),
+        borderColor: C_RED,
+        borderWidth: 1.2,
+        pointRadius: 0,
+        tension: 0.2,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        tooltip: {
+          backgroundColor: '#111419',
+          borderColor: '#1e2330',
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: commonX,
+        y: {
+          grid: { color: C_MUTED },
+          title: { display: true, text: 'Deviation from baseline', color: '#4a5568' }
+        }
+      }
+    }
+  });
+
+  // ── 3. Panic spread ──────────────────────────────────────────────────────
+  new Chart(document.getElementById('chart-spread'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Spread %',
+        data: data.map(d => d.spread_pct ? d.spread_pct * 100 : null),
+        borderColor: C_RED,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.2,
+        fill: {
+          target: 'origin',
+          above: 'rgba(224,82,82,0.08)'
+        }
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        tooltip: {
+          backgroundColor: '#111419',
+          borderColor: '#1e2330',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => ` Spread: ${ctx.parsed.y?.toFixed(2)}%`
+          }
+        }
+      },
+      scales: {
+        x: commonX,
+        y: {
+          grid: { color: C_MUTED },
+          title: { display: true, text: 'τ (%)', color: '#4a5568' }
+        }
+      }
+    }
+  });
+
+  // ── 4. Components ────────────────────────────────────────────────────────
+  new Chart(document.getElementById('chart-components'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'z_gap',
+          data: data.map(d => d.z_gap),
+          borderColor: C_ACCENT,
+          borderWidth: 1,
+          pointRadius: 0,
+          tension: 0.3
+        },
+        {
+          label: 'z_spread',
+          data: data.map(d => d.z_spread),
+          borderColor: C_RED,
+          borderWidth: 1,
+          pointRadius: 0,
+          tension: 0.3
+        },
+        {
+          label: 'z_liq',
+          data: data.map(d => d.z_liq),
+          borderColor: C_BLUE,
+          borderWidth: 1,
+          pointRadius: 0,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        tooltip: {
+          backgroundColor: '#111419',
+          borderColor: '#1e2330',
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: commonX,
+        y: {
+          grid: { color: C_MUTED },
+          title: { display: true, text: 'σ', color: '#4a5568' }
+        }
+      }
+    }
+  });
+}
+
+init().catch(err => {
+  document.getElementById('loader').textContent = 'ERROR LOADING DATA — ' + err.message;
+});
+</script>
+</body>
+</html>
