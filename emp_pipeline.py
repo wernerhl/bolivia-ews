@@ -414,36 +414,46 @@ def main():
     daily.to_csv(daily_path, index=False)
     print(f"Saved daily output    → {daily_path}")
 
-    # ── 9. Supabase upload ─────────────────────────────────────────────────────
+    # ── 9. Supabase upload (non-fatal) ──────────────────────────────────────────
+    # The dashboard (docs/data.json) is built by export_json.py from the local
+    # CSVs and does NOT depend on Supabase. A Supabase outage must therefore never
+    # crash this run — otherwise export_json.py / the commit step never run, the
+    # public dashboard freezes, and the scheduled workflow eventually gets
+    # auto-disabled for inactivity. So log loudly and continue on failure; the
+    # upload resumes on its own once Supabase is reachable again.
     if args.upload:
-        print("Uploading to Supabase...")
-        sb = supabase_client()
+        try:
+            print("Uploading to Supabase...")
+            sb = supabase_client()
 
-        upsert(sb, "emp_daily", daily, ["date"])
+            upsert(sb, "emp_daily", daily, ["date"])
 
-        def _c(v):
-            if isinstance(v, float) and math.isnan(v): return None
-            return round(float(v), 6) if isinstance(v, (float, int, np.floating)) else v
+            def _c(v):
+                if isinstance(v, float) and math.isnan(v): return None
+                return round(float(v), 6) if isinstance(v, (float, int, np.floating)) else v
 
-        snap = {
-            "id":             1,
-            "timestamp":      df.index[-1].strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "mid":            _c(lr.get("mid")),
-            "spread_pct":     _c(lr.get("spread_pct")),
-            "gap":            _c(lr.get("gap")),
-            "emp":            _c(lr.get("emp")),
-            "emp_rolling":    _c(lr.get("emp_rolling")),
-            "emp_dfm":        _c(lr.get("emp_dfm")),
-            "emp_dfm_lo":     _c(lr.get("emp_dfm_lo")),
-            "emp_dfm_hi":     _c(lr.get("emp_dfm_hi")),
-            "prob_depr_14d":  _c(lr.get("prob_depr_14d")),
-            "prob_depr_30d":  _c(lr.get("prob_depr_30d")),
-            "alarm_mass_14d": _c(lr.get("alarm_mass_14d")),
-            "alarm_mass_30d": _c(lr.get("alarm_mass_30d")),
-            "updated_at":     pd.Timestamp.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        }
-        sb.table("emp_latest").upsert(snap, on_conflict="id").execute()
-        print("  Upserted latest snapshot → emp_latest")
+            snap = {
+                "id":             1,
+                "timestamp":      df.index[-1].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "mid":            _c(lr.get("mid")),
+                "spread_pct":     _c(lr.get("spread_pct")),
+                "gap":            _c(lr.get("gap")),
+                "emp":            _c(lr.get("emp")),
+                "emp_rolling":    _c(lr.get("emp_rolling")),
+                "emp_dfm":        _c(lr.get("emp_dfm")),
+                "emp_dfm_lo":     _c(lr.get("emp_dfm_lo")),
+                "emp_dfm_hi":     _c(lr.get("emp_dfm_hi")),
+                "prob_depr_14d":  _c(lr.get("prob_depr_14d")),
+                "prob_depr_30d":  _c(lr.get("prob_depr_30d")),
+                "alarm_mass_14d": _c(lr.get("alarm_mass_14d")),
+                "alarm_mass_30d": _c(lr.get("alarm_mass_30d")),
+                "updated_at":     pd.Timestamp.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            }
+            sb.table("emp_latest").upsert(snap, on_conflict="id").execute()
+            print("  Upserted latest snapshot → emp_latest")
+        except Exception as e:
+            print(f"  WARNING: Supabase upload failed ({type(e).__name__}: {e}). "
+                  f"Continuing — dashboard export/commit still run.", file=sys.stderr)
 
     return df, daily
 

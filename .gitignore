@@ -1,0 +1,7 @@
+# Kaggle API credentials — never commit; the workflow uses the KAGGLE_* Actions secrets.
+kaggle.json
+.kaggle/
+
+# Python
+__pycache__/
+*.pyc
