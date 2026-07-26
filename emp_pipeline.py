@@ -453,7 +453,7 @@ def main():
             print("  Upserted latest snapshot → emp_latest")
         except Exception as e:
             print(f"  WARNING: Supabase upload failed ({type(e).__name__}: {e}). "
-                  f"Continuing — dashboard export/commit still run.", file=sys.stderr)
+                  f"Continuing — dashboard export/commit still run.")
 
     return df, daily
 
